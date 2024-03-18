@@ -444,6 +444,8 @@ class DeltaCorrelatingPredictionTables(SimObject):
         LRURP(), "Replacement policy of the table"
     )
 
+    nPC = Param.Unsigned(5, "Number of Last PCs to be considered")
+
 
 class DCPTPrefetcher(QueuedPrefetcher):
     type = "DCPTPrefetcher"
@@ -687,10 +689,45 @@ class PIFPrefetcher(QueuedPrefetcher):
             HWPProbeEventRetiredInsts(self, simObj, "RetiredInstsPC")
         )
 
+class CS395TPrefetcherTables(SimObject):
+    type = "CS395TPrefetcherTables"
+    cxx_class = "gem5::prefetch::CS395TPrefetcherTables"
+    cxx_header = "mem/cache/prefetch/cs395t_pf.hh"
+    deltas_per_entry = Param.Unsigned(
+        20, "Number of deltas stored in each table entry"
+    )
+    delta_bits = Param.Unsigned(12, "Bits per delta")
+    delta_mask_bits = Param.Unsigned(
+        8, "Lower bits to mask when comparing deltas"
+    )
+    table_entries = Param.MemorySize("128", "Number of entries in the table")
+    table_assoc = Param.Unsigned(128, "Associativity of the table")
+    table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(
+            entry_size=1, assoc=Parent.table_assoc, size=Parent.table_entries
+        ),
+        "Indexing policy of the table",
+    )
+    table_replacement_policy = Param.BaseReplacementPolicy(
+        LRURP(), "Replacement policy of the table"
+    )
+
+    nPC    = Param.Unsigned(1, "Number of Last PCs to be considered")
+    nDelta = Param.Unsigned(5, "Number of Last PCs to be considered")
+
 class CS395TPrefetcher(QueuedPrefetcher):
     type = "CS395TPrefetcher"
     cxx_class = "gem5::prefetch::CS395TPrefetcher"
     cxx_header = "mem/cache/prefetch/cs395t_pf.hh"
 
-    size = Param.Unsigned(1024, "Example parameter")
-    # TODO: Add more params here
+    nPC    = Param.Unsigned(1, "Number of Last PCs to be considered")
+    nDelta = Param.Unsigned(5, "Number of Last PCs to be considered")
+
+    tabObj = CS395TPrefetcherTables()
+    #tabObj.nPC = nPC.getValue()
+    #tabObj.nDelta = nDelta.getValue()
+    dcpt = Param.CS395TPrefetcherTables(
+        tabObj,
+        "CS395T Tables object",
+    )
+    
