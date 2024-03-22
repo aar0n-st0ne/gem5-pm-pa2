@@ -135,7 +135,7 @@ CS395TPrefetcherTables::calculatePrefetch(
     lastPC[0] = pfi.getPC();
     Addr pc = 0;
     // Hashing the last n PCs to get the index
-    for(int i=0; i<nPC; i++) pc ^= lastPC[i];
+    for(int i=0; i<nPC; i++) pc ^= (lastPC[i] >> i);
 
     // Look up table entry, is_secure is unused in findEntry because we
     // index using the pc
